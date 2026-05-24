@@ -7,9 +7,21 @@ from django.contrib.messages import constants as message_constants
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-production')
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default=not bool(os.environ.get('VERCEL')), cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost', cast=Csv())
 CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='', cast=Csv())
+
+if os.environ.get('VERCEL'):
+    ALLOWED_HOSTS += ['.vercel.app']
+    CSRF_TRUSTED_ORIGINS += ['https://*.vercel.app']
+
+for vercel_host in [
+    os.environ.get('VERCEL_URL'),
+    os.environ.get('VERCEL_PROJECT_PRODUCTION_URL'),
+]:
+    if vercel_host:
+        ALLOWED_HOSTS.append(vercel_host)
+        CSRF_TRUSTED_ORIGINS.append(f'https://{vercel_host}')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
