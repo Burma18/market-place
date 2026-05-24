@@ -1,5 +1,9 @@
-venv
+venv/
+.env
 db.sqlite3
-.idea
+.idea/
 __pycache__/
-migrations
+*.pyc
+staticfiles/
+media/
+.DS_Store

@@ -1,63 +1,41 @@
-from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.views import LoginView, LogoutView
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
+
 from users.forms import LoginForm, RegisterForm
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
 
 
-# Create your views here.
+class UserLoginView(LoginView):
+    template_name = 'users/login.html'
+    authentication_form = LoginForm
+    redirect_authenticated_user = True
+
+    def get_success_url(self):
+        return reverse_lazy('product-list')
+
+    def form_valid(self, form):
+        messages.success(self.request, f'Добро пожаловать, {form.get_user().username}!')
+        return super().form_valid(form)
 
 
-def login_view(request):
-    if request.method == 'GET':
-        context = {
-            'form': LoginForm(),
-        }
-        return render(request, 'users/login.html', context=context)
-    if request.method == 'POST':
-        form = LoginForm(data=request.POST)
+class UserLogoutView(LogoutView):
+    next_page = reverse_lazy('home')
 
-        if form.is_valid():
-            user = authenticate(
-                username=form.cleaned_data.get('username'),
-                password=form.cleaned_data.get('password')
-            )
-            if user:
-                login(request, user)
-                return redirect('/products/')
-            else:
-                form.add_error('username', 'чувак попробуй дагы бир жолу')
-
-        return render(request, 'users/login.html', context={
-            'form': form,
-        })
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            messages.info(request, 'Вы вышли из аккаунта.')
+        return super().dispatch(request, *args, **kwargs)
 
 
-def logout_view(request):
-    logout(request)
-    return redirect('/products/')
+class UserRegisterView(CreateView):
+    template_name = 'users/register.html'
+    form_class = RegisterForm
+    success_url = reverse_lazy('product-list')
 
-
-def register_view(request):
-    if request.method == 'GET':
-        context = {
-            'form': RegisterForm,
-        }
-        return render(request, 'users/register.html', context=context)
-
-    if request.method == 'POST':
-        form = RegisterForm(data=request.POST)
-
-        if form.is_valid():
-            password1, password2 = form.cleaned_data.get('password1'), form.cleaned_data.get('password2')
-            if password1 == password2:
-                User.objects.create_user(
-                    username=form.cleaned_data.get('username'),
-                    password=form.cleaned_data.get('password1')
-                )
-                return redirect('/products/')
-            else:
-                form.add_error('password1', 'ошибка')
-
-        return render(request, 'users/register.html', context={
-            'form': form,
-        })
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        login(self.request, self.object)
+        messages.success(self.request, 'Регистрация прошла успешно!')
+        return response

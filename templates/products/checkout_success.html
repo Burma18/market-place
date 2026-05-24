@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Оплата прошла успешно{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <div class="display-1 text-success mb-3">✓</div>
+    <h2>Оплата прошла успешно!</h2>
+    <p class="lead text-muted mt-2">
+        Заказ #{{ order.id }} · <strong>{{ order.total }} сом</strong>
+    </p>
+    <p class="text-muted small">Тестовый режим Stripe — реальные деньги не списываются.</p>
+
+    {% if order.items.all %}
+    <div class="card mt-4 mx-auto" style="max-width: 480px;">
+        <ul class="list-group list-group-flush text-start">
+            {% for item in order.items.all %}
+            <li class="list-group-item d-flex justify-content-between">
+                <span>{{ item.title }} × {{ item.quantity }}</span>
+                <span>{{ item.subtotal }} сом</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'profile' %}" class="btn btn-outline-primary me-2">Мои заказы</a>
+        <a href="{% url 'product-list' %}" class="btn btn-primary">В каталог</a>
+    </div>
+</div>
+{% endblock %}

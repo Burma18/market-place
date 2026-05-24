@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Профиль — {{ user.username }}</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4 class="h5">Мои товары</h4>
+        {% if products %}
+        <ul class="list-group mb-4">
+            {% for product in products %}
+            <li class="list-group-item">
+                <div class="d-flex align-items-center gap-3">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:10px;">
+                    {% else %}
+                        <img src="{% static 'img/placeholder.svg' %}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:10px;">
+                    {% endif %}
+                    <div class="flex-grow-1">
+                        <a class="fw-semibold text-decoration-none" href="{% url 'product-detail' product.id %}">
+                            {{ product.title }}
+                        </a>
+                        {% if product.category %}
+                            <div class="text-muted small">{{ product.category.title }}</div>
+                        {% endif %}
+                    </div>
+                    <span class="badge bg-primary">{{ product.price }} сом</span>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'product-create' %}" class="btn btn-primary btn-sm">+ Добавить товар</a>
+        {% else %}
+        <p class="text-muted">У вас пока нет товаров.</p>
+        <a href="{% url 'product-create' %}" class="btn btn-primary btn-sm">Создать первый товар</a>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h4 class="h5">История заказов</h4>
+        {% if orders %}
+        <ul class="list-group">
+            {% for order in orders %}
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Заказ #{{ order.id }} — {{ order.created_at|date:"d.m.Y H:i" }}</span>
+                    <strong>{{ order.total }} сом</strong>
+                </div>
+                <small class="text-muted">
+                    {{ order.get_status_display }}
+                    {% if order.items.all %}· {{ order.items.count }} поз.{% endif %}
+                </small>
+                {% if order.items.all %}
+                    <div class="mt-2 small">
+                        {% for item in order.items.all %}
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">{{ item.title }} × {{ item.quantity }}</span>
+                                <span class="text-muted">{{ item.subtotal }} сом</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">Заказов пока нет.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

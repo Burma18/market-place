@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Оплата отменена{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h2>Оплата отменена</h2>
+    <p class="text-muted mt-2">Товары остались в корзине. Вы можете попробовать снова.</p>
+    <a href="{% url 'cart' %}" class="btn btn-primary mt-3">Вернуться в корзину</a>
+</div>
+{% endblock %}

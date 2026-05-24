@@ -1,57 +1,69 @@
-{% extends 'layouts/index.html' %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.title }}{% endblock %}
 
 {% block content %}
-    <div class="product">
-        <style type="text/css">
-            .product {
-                width: 80%;
-                margin-left: 10%;
-            }
+<div class="row">
+    <div class="col-md-5 mb-4">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" class="product-detail-img" alt="{{ product.title }}">
+        {% else %}
+        <img src="{% static 'img/placeholder.svg' %}" class="product-detail-img" alt="Нет фото">
+        {% endif %}
+    </div>
+    <div class="col-md-7">
+        {% if product.category %}
+        <span class="badge bg-secondary">{{ product.category.title }}</span>
+        {% endif %}
+        <h1 class="mt-2">{{ product.title }}</h1>
+        <p class="product-price fs-3">{{ product.price }} сом</p>
+        <p class="text-muted">{{ product.description }}</p>
+        <p class="small text-muted">
+            Добавлен: {{ product.created_date }} · Обновлён: {{ product.modified_date }}
+            · Автор: {{ product.author.username }}
+        </p>
 
-            .date {
-                display: flex;
-                justify-content: space-between;
-            }
-
-            .comments {
-                margin-top: 20px;
-            }
-
-            .comment {
-                background: #242b2e;
-                color: #fff;
-                padding: 10px;
-                margin-bottom: 20px;
-            }
-        </style>
-        <img class="product_image" src="/media/{{ products.image }}/" alt="">
-        <h1>{{ products.title }}</h1>
-        <h2>{{ products.price }}</h2>
-        <h2>Price:{{ products.price }}</h2>
-        <h2>{{ products.description }}</h2>
-        <div class="date">
-            <h4>{{ products.creadted_date }}</h4>
-            <h4>{{ products.modified_date }}</h4>
-        </div>
-         <div class="create_review">
-            <form action="/products/{{ products.id }}/" method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <input type="submit" value="Add Review">
-            </form>
-        </div>
-        <div class="comments">
-            {% for comment in comments %}
-                <div class="comment">
-                    <h6>Review: {{ comment.review }}</h6>
-                    <p>Date: {{ comment.date }}</p>
-                </div>
-            {% endfor %}
+        <div class="d-flex gap-2 mt-3">
+            {% if user.is_authenticated %}
+            <a href="{% url 'cart-add' product.id %}" class="btn btn-primary">В корзину</a>
+            {% endif %}
+            {% if user == product.author or user.is_staff %}
+            <a href="{% url 'product-edit' product.id %}" class="btn btn-outline-secondary">Редактировать</a>
+            <a href="{% url 'product-delete' product.id %}" class="btn btn-outline-danger">Удалить</a>
+            {% endif %}
+            <a href="{% url 'product-list' %}" class="btn btn-outline-primary">← Каталог</a>
         </div>
     </div>
+</div>
 
+<hr class="my-4">
+
+<h3 class="h5 mb-3">Отзывы ({{ reviews.count }})</h3>
+
+{% if user.is_authenticated %}
+<form method="post" class="mb-4">
+    {% csrf_token %}
+    <div class="mb-2">
+        {{ form.review }}
+        {% if form.review.errors %}
+        <div class="text-danger small">{{ form.review.errors }}</div>
+        {% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm">Добавить отзыв</button>
+</form>
+{% else %}
+<p class="text-muted"><a href="{% url 'login' %}">Войдите</a>, чтобы оставить отзыв.</p>
+{% endif %}
+
+{% for review in reviews %}
+<div class="review-card">
+    <p class="mb-1">{{ review.review }}</p>
+    <small class="text-muted">
+        {% if review.user %}{{ review.user.username }} · {% endif %}{{ review.date }}
+    </small>
+</div>
+{% empty %}
+<p class="text-muted">Отзывов пока нет. Будьте первым!</p>
+{% endfor %}
 {% endblock %}
-
-
-
-

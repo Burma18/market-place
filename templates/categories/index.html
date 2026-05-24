@@ -1,28 +1,32 @@
-{% extends 'layouts/index.html' %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Категории{% endblock %}
 
 {% block content %}
-    <style type="text/css">
-
-        .categories {
-            display: flex;
-            justify-content: space-between;
-            width: 20%;
-        }
-
-    </style>
-    <div class="categories">
-        {% for category in categories %}
-            <div class="category">
-                <h3>
-                    <a href="/products/?category_id={{ category.id }}">
-                        {{ category.title }} {{ category.posts.count }}
-                    </a>
-                </h3>
+<h2 class="mb-4">Категории</h2>
+<div class="row g-4">
+    {% for category in categories %}
+    <div class="col-md-4 col-lg-3">
+        <div class="card product-card h-100">
+            {% if category.image %}
+            <img src="{{ category.image.url }}" class="card-img-top" alt="{{ category.title }}">
+            {% else %}
+            <img src="{% static 'img/placeholder.svg' %}" class="card-img-top" alt="">
+            {% endif %}
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ category.title }}</h5>
+                <p class="text-muted small">{{ category.products.count }} товаров</p>
+                <a href="{% url 'product-list' %}?category_id={{ category.id }}" class="btn btn-primary btn-sm">
+                    Смотреть товары
+                </a>
             </div>
-
-        {% endfor %}
+        </div>
     </div>
+    {% empty %}
+    <div class="empty-state">
+        <p>Категории не найдены. Запустите <code>python manage.py seed_demo</code></p>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}
-
-
-

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<section class="hero text-center">
+    <h1 class="display-4 fw-bold">Добро пожаловать в ShopKG</h1>
+    <p class="lead mt-3">Интернет-магазин на Django — каталог товаров, корзина, отзывы и личный кабинет</p>
+    <div class="mt-4">
+        <a href="{% url 'product-list' %}" class="btn btn-light btn-lg me-2">Смотреть каталог</a>
+        {% if user.is_anonymous %}
+        <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">Войти</a>
+        {% endif %}
+    </div>
+</section>
+
+<h2 class="h4 mb-3">Популярные товары</h2>
+{% if featured_products %}
+<div class="product-grid">
+    {% for product in featured_products %}
+    <div class="card product-card">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}">
+        {% else %}
+        <img src="{% static 'img/placeholder.svg' %}" class="card-img-top" alt="Нет фото">
+        {% endif %}
+        <div class="card-body">
+            <h5 class="card-title">{{ product.title }}</h5>
+            <p class="text-muted small">{{ product.description|truncatewords:12 }}</p>
+            <p class="product-price">{{ product.price }} сом</p>
+            <a href="{% url 'product-detail' product.id %}" class="btn btn-primary btn-sm mt-2">Подробнее</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <p>Товары пока не добавлены.</p>
+    <p class="small">Запустите: <code>python manage.py seed_demo</code></p>
+</div>
+{% endif %}
+{% endblock %}
